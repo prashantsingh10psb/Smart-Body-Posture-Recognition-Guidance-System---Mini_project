@@ -1,0 +1,196 @@
+{
+  "version": "1.0.0",
+  "measurementTypes": {
+    "BP": {
+      "name": "Blood Pressure Check",
+      "description": "Requires upright seated posture with uncrossed legs and arm supported at heart level.",
+      "holdDurationSeconds": 2.5,
+      "rules": [
+        {
+          "id": "BP_NO_SLOUCH",
+          "name": "Upright Spine (No Slouching)",
+          "description": "Torso/spine angle relative to vertical axis must be within safe limits.",
+          "metric": "spine_tilt_angle_deg",
+          "maxAllowed": 18.0,
+          "severity": "CRITICAL",
+          "visualMessage": "Sit up straight against the backrest",
+          "highlightJoints": [
+            "LEFT_SHOULDER",
+            "RIGHT_SHOULDER",
+            "LEFT_HIP",
+            "RIGHT_HIP"
+          ]
+        },
+        {
+          "id": "BP_UNCROSSED_LEGS",
+          "name": "Uncrossed Legs & Level Knees",
+          "description": "Knees and ankles must not cross or overlap.",
+          "metric": "knee_ankle_overlap",
+          "maxAllowed": 0.05,
+          "severity": "CRITICAL",
+          "visualMessage": "Uncross your legs and keep feet flat on the floor",
+          "highlightJoints": [
+            "LEFT_KNEE",
+            "RIGHT_KNEE",
+            "LEFT_ANKLE",
+            "RIGHT_ANKLE"
+          ]
+        },
+        {
+          "id": "BP_ARM_HEART_LEVEL",
+          "name": "Arm at Heart Level",
+          "description": "Active measuring arm (elbow and wrist) must be aligned with heart/chest level.",
+          "metric": "arm_to_heart_offset_ratio",
+          "maxAllowed": 0.15,
+          "severity": "WARNING",
+          "visualMessage": "Rest your arm on the table at heart level",
+          "highlightJoints": [
+            "LEFT_ELBOW",
+            "LEFT_WRIST",
+            "LEFT_SHOULDER",
+            "RIGHT_ELBOW",
+            "RIGHT_WRIST",
+            "RIGHT_SHOULDER"
+          ]
+        },
+        {
+          "id": "BP_HEAD_LEVEL",
+          "name": "Head & Neck Neutral",
+          "description": "Head should not droop forward excessively.",
+          "metric": "neck_flexion_angle_deg",
+          "maxAllowed": 25.0,
+          "severity": "INFO",
+          "visualMessage": "Keep your head up and look forward",
+          "highlightJoints": [
+            "NOSE",
+            "LEFT_EAR",
+            "RIGHT_EAR",
+            "LEFT_SHOULDER",
+            "RIGHT_SHOULDER"
+          ]
+        }
+      ]
+    },
+    "Weight": {
+      "name": "Weight & Body Composition",
+      "description": "Requires steady standing posture, balanced weight distribution, arms hanging relaxed.",
+      "holdDurationSeconds": 2.5,
+      "rules": [
+        {
+          "id": "WT_STANDING_UPRIGHT",
+          "name": "Stand Straight",
+          "description": "Torso and legs must be vertically aligned with minimal lateral tilt.",
+          "metric": "torso_lateral_tilt_deg",
+          "maxAllowed": 10.0,
+          "severity": "CRITICAL",
+          "visualMessage": "Stand tall and centered on the scale",
+          "highlightJoints": [
+            "LEFT_SHOULDER",
+            "RIGHT_SHOULDER",
+            "LEFT_HIP",
+            "RIGHT_HIP",
+            "LEFT_ANKLE",
+            "RIGHT_ANKLE"
+          ]
+        },
+        {
+          "id": "WT_BALANCED_FEET",
+          "name": "Even Weight Distribution",
+          "description": "Feet must be shoulder-width apart without leaning heavily to one side.",
+          "metric": "hip_lateral_asymmetry_ratio",
+          "maxAllowed": 0.08,
+          "severity": "WARNING",
+          "visualMessage": "Distribute your weight evenly on both feet",
+          "highlightJoints": [
+            "LEFT_HIP",
+            "RIGHT_HIP",
+            "LEFT_ANKLE",
+            "RIGHT_ANKLE"
+          ]
+        },
+        {
+          "id": "WT_ARMS_AT_SIDES",
+          "name": "Arms Relaxed at Sides",
+          "description": "Arms must hang naturally by the sides, not resting on rails.",
+          "metric": "arms_abduction_angle_deg",
+          "maxAllowed": 28.0,
+          "severity": "WARNING",
+          "visualMessage": "Keep your arms relaxed at your sides without leaning on rails",
+          "highlightJoints": [
+            "LEFT_SHOULDER",
+            "LEFT_WRIST",
+            "RIGHT_SHOULDER",
+            "RIGHT_WRIST"
+          ]
+        }
+      ]
+    },
+    "ECG": {
+      "name": "ECG Diagnostic Scan",
+      "description": "Requires seated, still posture with relaxed arms resting on pads to minimize muscle artifacts.",
+      "holdDurationSeconds": 3.0,
+      "rules": [
+        {
+          "id": "ECG_SEATED_UPRIGHT",
+          "name": "Upright Seated Position",
+          "description": "Spine upright and supported by chair back.",
+          "metric": "spine_tilt_angle_deg",
+          "maxAllowed": 15.0,
+          "severity": "CRITICAL",
+          "visualMessage": "Sit back comfortably and keep your spine upright",
+          "highlightJoints": [
+            "LEFT_SHOULDER",
+            "RIGHT_SHOULDER",
+            "LEFT_HIP",
+            "RIGHT_HIP"
+          ]
+        },
+        {
+          "id": "ECG_UNCROSSED_LEGS",
+          "name": "Legs Uncrossed & Grounded",
+          "description": "Legs uncrossed to prevent pelvic torque and baseline wander.",
+          "metric": "knee_ankle_overlap",
+          "maxAllowed": 0.05,
+          "severity": "CRITICAL",
+          "visualMessage": "Keep feet flat on the floor and uncross legs",
+          "highlightJoints": [
+            "LEFT_KNEE",
+            "RIGHT_KNEE",
+            "LEFT_ANKLE",
+            "RIGHT_ANKLE"
+          ]
+        },
+        {
+          "id": "ECG_ARMS_RESTING",
+          "name": "Forearms Resting on Electrodes",
+          "description": "Arms must be resting steadily on sensor pads.",
+          "metric": "arm_elevation_angle_deg",
+          "maxAllowed": 20.0,
+          "severity": "CRITICAL",
+          "visualMessage": "Rest forearms gently on the sensor pads",
+          "highlightJoints": [
+            "LEFT_ELBOW",
+            "LEFT_WRIST",
+            "RIGHT_ELBOW",
+            "RIGHT_WRIST"
+          ]
+        },
+        {
+          "id": "ECG_STILLNESS",
+          "name": "Body Stillness",
+          "description": "User must remain motionless to prevent electromyographic (EMG) noise.",
+          "metric": "motion_variance_norm",
+          "maxAllowed": 0.02,
+          "severity": "WARNING",
+          "visualMessage": "Stay relaxed and remain still",
+          "highlightJoints": [
+            "LEFT_SHOULDER",
+            "RIGHT_SHOULDER",
+            "LEFT_WRIST",
+            "RIGHT_WRIST"
+          ]
+        }
+      ]
+    }
+  }
+}

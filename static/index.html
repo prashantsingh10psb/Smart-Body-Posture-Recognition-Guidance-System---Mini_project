@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Body Posture Recognition & Guidance System</title>
+  <link rel="stylesheet" href="/static/css/kiosk.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="kiosk-header">
+    <div class="kiosk-brand">
+      <div class="kiosk-logo-badge">🩺</div>
+      <div class="brand-text">
+        <h1>Smart Posture Guidance System <span class="brand-badge">v1.0 • Kiosk Edition</span></h1>
+        <p>GLA University • B.Tech CSE Mini-Project (Team OG-Coders T-89) • Mentor: Rohit Kumar Gupta Sir</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-open-calibration" class="action-btn" title="Adjust posture angle thresholds">⚙️ Calibration</button>
+      <button id="btn-open-analytics" class="action-btn" title="View KPI analytics and error statistics">📊 Analytics & KPIs</button>
+    </div>
+  </header>
+
+  <!-- Vital Signs Mode Bar -->
+  <nav class="mode-bar">
+    <span class="mode-label">Measurement Mode:</span>
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="BP">
+        <span>🩺</span> Blood Pressure (BP)
+      </button>
+      <button class="mode-tab" data-mode="Weight">
+        <span>⚖️</span> Weight & BMI
+      </button>
+      <button class="mode-tab" data-mode="ECG">
+        <span>❤️</span> ECG Diagnostic Scan
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Kiosk Body -->
+  <main class="kiosk-main">
+    <!-- Left Column: Video Viewport & Overlays -->
+    <section class="viewport-card">
+      <div class="viewport-header">
+        <div class="viewport-title">
+          <span id="current-mode-title">Blood Pressure Posture Check</span>
+        </div>
+        <div id="live-indicator-badge" class="live-indicator" style="display: none;">
+          <span class="live-dot"></span> LIVE SENSOR FEED
+        </div>
+      </div>
+
+      <div class="video-stage">
+        <!-- Live webcam video element -->
+        <video id="webcam-video" autoplay playsinline muted></video>
+        <!-- High-DPI transparent canvas for skeleton & error highlights -->
+        <canvas id="overlay-canvas"></canvas>
+
+        <!-- Dynamic HUD Status Banner -->
+        <div id="hud-status-banner" class="hud-status-banner status-waiting">
+          <span id="hud-status-text">Position yourself in front of kiosk camera</span>
+          <span id="hud-status-icon">👁️</span>
+        </div>
+
+        <!-- 2.5s Steady Hold Progress Countdown Bar -->
+        <div class="hold-progress-container">
+          <div class="hold-progress-header">
+            <span id="hold-progress-text">Hold posture for 2.5s to start scan</span>
+            <span id="hold-progress-target">Target: 2.5s</span>
+          </div>
+          <div class="hold-progress-track">
+            <div id="hold-progress-fill" class="hold-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Simulation Presets Bar -->
+      <div class="viewport-footer">
+        <div class="camera-controls">
+          <button id="btn-toggle-cam" class="ctrl-btn btn-primary">📷 Start Camera</button>
+        </div>
+
+        <div class="preset-controls">
+          <label for="preset-select" style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Posture Preset Demo:</label>
+          <select id="preset-select" class="ctrl-btn" style="background: #1e293b; color: #fff; cursor: pointer;">
+            <option value="">-- Choose Test Scenario --</option>
+            <option value="BP_PERFECT">BP: Perfect Posture (Auto-Triggers)</option>
+            <option value="BP_SLOUCH">BP: Slouching Error (Spine Tilt)</option>
+            <option value="BP_CROSSED_LEGS">BP: Crossed Legs Error</option>
+            <option value="BP_ARM_LOW">BP: Arm Below Heart Error</option>
+            <option value="WEIGHT_PERFECT">Weight: Balanced Standing</option>
+            <option value="WEIGHT_LEANING">Weight: Leaning on Rails</option>
+            <option value="ECG_PERFECT">ECG: Resting Seated Scan</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Real-Time Guidance, Errors & Vitals Simulator -->
+    <aside class="info-panel">
+      <!-- Alignment Score & Feedback Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>🎯</span> Posture Alignment Score
+        </div>
+        <div class="score-row">
+          <div class="score-badge">
+            <span id="score-value">0%</span>
+            <small>compliance</small>
+          </div>
+          <div id="status-pill" class="status-pill badge-info">STANDBY</div>
+        </div>
+        <div id="primary-guidance-text" style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.4; padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border-radius: 8px; border-left: 3px solid var(--accent);">
+          Sit straight against backrest, uncross legs, and rest arm at chest height.
+        </div>
+      </div>
+
+      <!-- Active Posture Violations -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚠️</span> Real-Time Error Guidance
+        </div>
+        <div id="active-errors-container" class="errors-container">
+          <div class="no-errors-notice">
+            <span>✓</span>
+            <div>All clinical posture rules satisfied. Hold still for scan.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kiosk Hardware Sensor Simulation -->
+      <div class="card">
+        <div class="card-title">
+          <span>🩺</span> Kiosk Sensor Auto-Trigger
+        </div>
+        <div id="sensor-stage-container" class="sensor-stage">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🩺</div>
+          <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Blood Pressure Cuff</div>
+          <div class="sensor-idle-text">Sensor standby. Awaiting verified posture hold...</div>
+        </div>
+        <canvas id="ecg-canvas" style="display: none;"></canvas>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Kiosk Footer & Privacy Compliance -->
+  <footer class="kiosk-footer">
+    <div>
+      <strong>Team OG-Coders:</strong> Prasant Kumar (Leader), Pawan Kumar, Dhananjay Chaudhary
+    </div>
+    <div class="footer-compliance">
+      <div class="compliance-badge">
+        <span style="color: #10b981;">🔒</span> Zero PII Capture (Raw frames discarded immediately)
+      </div>
+      <div class="compliance-badge">
+        <span style="color: #38bdf8;">⚡</span> Target Latency &le; 300ms (p95)
+      </div>
+    </div>
+  </footer>
+
+  <!-- Analytics & KPI Dashboard Modal -->
+  <div id="analytics-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📊 Posture Analytics & Kiosk Operations Dashboard</h2>
+        <button id="btn-close-analytics" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">Auto-Trigger Reliability</div>
+            <div id="kpi-reliability" class="kpi-value">99.2%</div>
+            <div class="kpi-subtext">Target: &ge;98% (Section 8)</div>
+          </div>
+          <div class="kpi-card kpi-cyan">
+            <div class="kpi-label">Positioning Error Rate</div>
+            <div id="kpi-error-rate" class="kpi-value">&lt;2.0%</div>
+            <div class="kpi-subtext">Reduced from ~30% baseline</div>
+          </div>
+          <div class="kpi-card kpi-amber">
+            <div class="kpi-label">Avg. Check-In Time</div>
+            <div id="kpi-checkin-time" class="kpi-value">14.5s</div>
+            <div class="kpi-subtext">Goal: &lt;2 min (Section 1)</div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">Staff Dependency</div>
+            <div class="kpi-value">0%</div>
+            <div class="kpi-subtext">Autonomous self-guidance</div>
+          </div>
+          <div class="kpi-card kpi-cyan">
+            <div class="kpi-label">Total Kiosk Sessions</div>
+            <div id="kpi-total-sessions" class="kpi-value">0</div>
+            <div class="kpi-subtext">Anonymized logs</div>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <div class="chart-card">
+            <div class="chart-title">Most Common Posture Errors</div>
+            <div id="error-bars-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Clinical Impact Summary</div>
+            <ul style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.6; list-style-position: inside;">
+              <li><strong>Slouching:</strong> Falsely elevates blood pressure by 10&ndash;15 mmHg.</li>
+              <li><strong>Crossed Legs:</strong> Distorts systolic pressure readings by 5&ndash;8 mmHg.</li>
+              <li><strong>Arm Below Heart:</strong> Causes hydrostatic pressure overestimation (+6 mmHg).</li>
+              <li><strong>Scale Leaning:</strong> Alters load cell balance by 3&ndash;5 kg.</li>
+              <li><strong>Muscle Tremor:</strong> Induces EMG motion artifacts on ECG waveforms.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sessions-table-wrap">
+          <div class="table-header-title">Recent Anonymized Kiosk Sessions</div>
+          <table class="sessions-table">
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Measurement</th>
+                <th>Time</th>
+                <th>Duration</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="sessions-tbody">
+              <!-- Dynamically loaded -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calibration Settings Modal -->
+  <div id="calibration-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h2>⚙️ Posture Rule Calibration & Thresholds</h2>
+        <button id="btn-close-calibration" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 16px;">
+          Fine-tune posture tolerance angles and steady-hold durations stored in <code>config/posture_rules.json</code>.
+        </p>
+
+        <div class="calibration-grid">
+          <div class="form-group">
+            <label for="calib-slouch-angle">Max Spine Tilt Angle (Degrees):</label>
+            <input type="number" id="calib-slouch-angle" value="18" min="5" max="45" step="1">
+            <small>Default: 18&deg;. Lower values enforce stricter upright posture.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="calib-hold-time">Required Hold Duration (Seconds):</label>
+            <input type="number" id="calib-hold-time" value="2.5" min="1.0" max="5.0" step="0.5">
+            <small>Default: 2.5s (Synopsis accepts 2.0 to 3.0s).</small>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button id="btn-save-calibration" class="ctrl-btn btn-primary" style="padding: 8px 18px;">💾 Save Calibration</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="/static/js/sample_presets.js"></script>
+  <script src="/static/js/visual_overlay.js"></script>
+  <script src="/static/js/sensor_simulation.js"></script>
+  <script src="/static/js/analytics_dashboard.js"></script>
+  <script src="/static/js/kiosk.js"></script>
+</body>
+</html>
