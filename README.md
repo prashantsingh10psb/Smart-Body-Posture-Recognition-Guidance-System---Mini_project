@@ -52,7 +52,7 @@ This project delivers an **AI-powered computer vision guidance layer** that conn
 ## 📁 Project Structure
 
 ```text
-Dhananjay/
+Mini_Project_26_No_Voice/
 ├── mini_pro_synopsis.pdf               # Original approved B.Tech project synopsis
 ├── README.md                           # Main documentation & quickstart guide
 ├── requirements.txt                    # Project dependencies
